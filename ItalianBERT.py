@@ -8,7 +8,8 @@ print(emotion_classifier.predict(["Basta ancora con sto fascismo non ne possiamo
 
 sentiment_classifier = SentimentClassifier()
 
-print(sentiment_classifier.predict(["speriamo","negro"]))
+sentiment= sentiment_classifier.predict(["muori"])
+print(sentiment[0])
 
 from setfit import SetFitModel
 
@@ -16,14 +17,15 @@ from setfit import SetFitModel
 model = SetFitModel.from_pretrained("nickprock/setfit-italian-hate-speech")
 # Run inference
 preds = model(["Lei è una brutta bugiarda!", "Mi piace la pizza"," Non mi piace questa situazione","Non posso ascoltare", "Ti voglio poco bene"])
-print(preds)
+print(preds[0])
 
 # Use a pipeline as a high-level helper
 from transformers import pipeline
 
 pipe = pipeline("text-classification", model="IMSyPP/hate_speech_it")
 
-print(pipe("Lei è una brutta bugiarda!"))
+hate= pipe("Lei è una brutta bugiarda!")
+print(hate[0]['label'])
 
 
 

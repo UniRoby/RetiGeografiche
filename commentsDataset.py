@@ -4,6 +4,9 @@ import re
 import pandas as pd
 from feel_it import  SentimentClassifier
 from pytube import YouTube
+from transformers import pipeline
+import os
+
 
 
 #rimuovi emoji e altri simboli
@@ -50,22 +53,26 @@ def extractVideoComments(youtubeUrl,numComments):
 def getTarget(comment):
 
     sentiment_classifier = SentimentClassifier()
-
     sentiment=sentiment_classifier.predict([comment])
+    match sentiment[0]:
+        case 'negative': return 'negativo'
+        case 'positive': return 'positivo'
 
-    if(sentiment==['negative']):
-        return 1
-    else:
-        return 0
+def getSpeechDet(comment):
+
+    pipe = pipeline("text-classification", model="IMSyPP/hate_speech_it")
+    hate_speech=pipe(comment)
+    match hate_speech[0]['label']:
+        case 'LABEL_0': return 'no'
+        case 'LABEL_1': return 'inappropriato'
+        case 'LABEL_2': return  'offensivo'
+        case 'LABEL_3': return  'violento'
 
 
-import os
-import pandas as pd
-
-def createOrUpdateDataset(comments, canale, titoloVideo,topic):
+def createOrUpdateDataset(comments, canale, titolo,topic,social):
 
 
-    comment_data = [{"canale": canale, "titolo": titoloVideo, "commento": comment,"topic": topic, "hate_speech": getTarget(comment)} for comment in comments if len(comment) > 0]
+    comment_data = [{"social": social,"autore": canale, "titolo": titolo, "commento": comment,"topic": topic, "sentiment": getTarget(comment), "hate_speech": getSpeechDet(comment)} for comment in comments if len(comment) > 0]
 
     #Creazione di un DataFrame pandas
     df = pd.DataFrame(comment_data)
@@ -94,6 +101,6 @@ def start():
     nomeCanale = yt.author
     titoloVideo = yt.title
     listCommenti=extractVideoComments(videoUrl,numCommenti)
-    createOrUpdateDataset(listCommenti,nomeCanale,titoloVideo,topic)
+    createOrUpdateDataset(listCommenti,nomeCanale,titoloVideo,topic,"YouTube")
 
 start()
