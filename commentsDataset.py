@@ -31,7 +31,10 @@ def removeSymbolsAndEmoticons(text):
     # Rimuovi testo tra "@" e lo spazio successivo
 
     at_pattern = re.compile(r'[\s\u200B\u00A0]*@.*?[\s\u200B\u00A0]')
+    #rimuovi eventuali link nei commenti
+    link_pattern = re.compile(r'https?://\S+|www\.\S+')
     new_text = at_pattern.sub(r'', new_text)
+    new_text=link_pattern.sub('',new_text)
     new_text= new_text.replace('"', '')
 
     return new_text
@@ -65,14 +68,14 @@ def getSpeechDet(comment):
     match hate_speech[0]['label']:
         case 'LABEL_0': return 'no'
         case 'LABEL_1': return 'inappropriato'
-        case 'LABEL_2': return  'offensivo'
-        case 'LABEL_3': return  'violento'
+        case 'LABEL_2': return 'offensivo'
+        case 'LABEL_3': return 'violento'
 
 
-def createOrUpdateDataset(comments, canale, titolo,topic,social):
+def createOrUpdateDataset(comments, giornale, titolo,topic,social):
 
 
-    comment_data = [{"social": social,"autore": canale, "titolo": titolo, "commento": comment,"topic": topic, "sentiment": getTarget(comment), "hate_speech": getSpeechDet(comment)} for comment in comments if len(comment) > 0]
+    comment_data = [{"social": social,"giornale": giornale, "titolo": titolo, "commento": comment,"topic": topic, "sentiment": getTarget(comment), "hate_speech": getSpeechDet(comment)} for comment in comments if len(comment) > 0]
 
     #Creazione di un DataFrame pandas
     df = pd.DataFrame(comment_data)
@@ -91,16 +94,16 @@ def createOrUpdateDataset(comments, canale, titolo,topic,social):
 
 
 
-def start():
+def youtubeComments():
     videoUrl= input("inserisci l'url del video di YouTube: ")
     numCommenti= int(input("inserisci il numero di commenti da estrarre (100): "))
     topic= input("inserisci il topic: ")
     link = videoUrl
     yt = YouTube(link)
     # print("Visualizzazioni: ", yt.views)
-    nomeCanale = yt.author
+    nomeautore = yt.author
     titoloVideo = yt.title
     listCommenti=extractVideoComments(videoUrl,numCommenti)
-    createOrUpdateDataset(listCommenti,nomeCanale,titoloVideo,topic,"YouTube")
+    createOrUpdateDataset(listCommenti,nomeautore,titoloVideo,topic,"YouTube")
 
-start()
+
