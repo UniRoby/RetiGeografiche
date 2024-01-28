@@ -4,12 +4,12 @@ import numpy as np
 import re
 import commentsDataset as cd
 
-def twitterComments():
+def fbComments():
     # Leggi il nuovo dataset
-    df = pd.read_csv('TW_repubblica.csv')
+    df = pd.read_csv('fb.csv')
 
     # ottieni l'autore del post
-    commenti= df["full_text"].tolist()
+    commenti= df["Content"].tolist()
 
     listComments=[]
 
@@ -21,8 +21,8 @@ def twitterComments():
     titolo= input("Post (titolo): ")
     topic= input("Topic: ")
 
-    cd.createOrUpdateDataset(listComments, canale, titolo, topic,"Twitter")
+    cd.createOrUpdateDataset(listComments, canale, titolo, topic,"Facebook")
 
 
 
-twitterComments()
+fbComments()

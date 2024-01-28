@@ -40,7 +40,7 @@ def removeSymbolsAndEmoticons(text):
     return new_text
 
 
-
+'''
 def extractVideoComments(youtubeUrl,numComments):
     downloader = YoutubeCommentDownloader()
     comments = downloader.get_comments_from_url(youtubeUrl, sort_by=SORT_BY_POPULAR)
@@ -51,7 +51,7 @@ def extractVideoComments(youtubeUrl,numComments):
         listComments.append(removeSymbolsAndEmoticons(comment["text"]))
 
     return listComments
-
+'''
 
 def getTarget(comment):
 
@@ -94,6 +94,7 @@ def createOrUpdateDataset(comments, giornale, titolo,topic,social):
 
 
 
+'''
 def youtubeComments():
     videoUrl= input("inserisci l'url del video di YouTube: ")
     numCommenti= int(input("inserisci il numero di commenti da estrarre (100): "))
@@ -102,8 +103,8 @@ def youtubeComments():
     yt = YouTube(link)
     # print("Visualizzazioni: ", yt.views)
     nomeautore = yt.author
-    titoloVideo = yt.title
+    titolo = input("inserisci il titolo del video di YouTube: ")
     listCommenti=extractVideoComments(videoUrl,numCommenti)
-    createOrUpdateDataset(listCommenti,nomeautore,titoloVideo,topic,"YouTube")
-
+    createOrUpdateDataset(listCommenti,nomeautore,titolo,topic,"YouTube")
+'''
 
