@@ -33,17 +33,16 @@ def ytComments():
     videoUrl = input("inserisci l'url del video di YouTube: ")
     topic = input("Topic: ")
     titolo = input("Titolo): ")
-    numCommenti = 100
+    numCommenti = 50
     link = videoUrl
     yt = YouTube(link)
-    nomeautore = yt.author
+    #nomeautore = yt.author
+    nomeautore= input("Giornale: ")
 
+    listComments = extractVideoComments(videoUrl, numCommenti)
+    print(f"Numero commenti estratti: {len(listComments)}")
 
-    listCommenti = extractVideoComments(videoUrl, numCommenti)
-    cd.createOrUpdateDataset(listCommenti, nomeautore, titolo, topic, "YouTube")
-
-
-
+    cd.createOrUpdateDataset(listComments, nomeautore, titolo, topic, "YouTube")
 
 
 ytComments()

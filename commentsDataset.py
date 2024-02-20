@@ -1,16 +1,11 @@
-from itertools import islice
-from youtube_comment_downloader import *
 import re
 import pandas as pd
 from feel_it import  SentimentClassifier
-from pytube import YouTube
 from transformers import pipeline
 import os
 
 
-
 #rimuovi emoji e altri simboli
-
 def removeSymbolsAndEmoticons(text):
     emoji_pattern = re.compile("["
                                u"\U0001F600-\U0001F64F"  # emoticons
@@ -38,20 +33,6 @@ def removeSymbolsAndEmoticons(text):
     new_text= new_text.replace('"', '')
 
     return new_text
-
-
-'''
-def extractVideoComments(youtubeUrl,numComments):
-    downloader = YoutubeCommentDownloader()
-    comments = downloader.get_comments_from_url(youtubeUrl, sort_by=SORT_BY_POPULAR)
-    listComments=[]
-
-    for comment in islice(comments, numComments):
-
-        listComments.append(removeSymbolsAndEmoticons(comment["text"]))
-
-    return listComments
-'''
 
 def getTarget(comment):
 
@@ -81,7 +62,7 @@ def createOrUpdateDataset(comments, giornale, titolo,topic,social):
     df = pd.DataFrame(comment_data)
 
     # Nome del file CSV
-    csv_filename = 'commenti_dataset.csv'
+    csv_filename = 'commenti_dataset_r.csv'
 
     # Se il file CSV esiste già, apri il file e aggiungi le nuove righe
     if os.path.exists(csv_filename):
@@ -94,17 +75,5 @@ def createOrUpdateDataset(comments, giornale, titolo,topic,social):
 
 
 
-'''
-def youtubeComments():
-    videoUrl= input("inserisci l'url del video di YouTube: ")
-    numCommenti= int(input("inserisci il numero di commenti da estrarre (100): "))
-    topic= input("inserisci il topic: ")
-    link = videoUrl
-    yt = YouTube(link)
-    # print("Visualizzazioni: ", yt.views)
-    nomeautore = yt.author
-    titolo = input("inserisci il titolo del video di YouTube: ")
-    listCommenti=extractVideoComments(videoUrl,numCommenti)
-    createOrUpdateDataset(listCommenti,nomeautore,titolo,topic,"YouTube")
-'''
+
 

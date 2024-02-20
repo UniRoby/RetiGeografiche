@@ -6,7 +6,7 @@ import commentsDataset as cd
 
 def fbComments():
     # Leggi il nuovo dataset
-    df = pd.read_csv('fb.csv')
+    df = pd.read_csv('FB/fb.csv')
 
     # ottieni l'autore del post
     commenti= df["Content"].tolist()
@@ -16,7 +16,7 @@ def fbComments():
     for i,comment in enumerate(commenti):
         listComments.append(cd.removeSymbolsAndEmoticons(comment))
 
-
+    print(f"Numero commenti estratti: {len(listComments)}")
     canale= input("Pagina (autore): ")
     titolo= input("Post (titolo): ")
     topic= input("Topic: ")
