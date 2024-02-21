@@ -33,7 +33,7 @@ def ytComments():
     videoUrl = input("inserisci l'url del video di YouTube: ")
     topic = input("Topic: ")
     titolo = input("Titolo): ")
-    numCommenti = 50
+    numCommenti = 105
     link = videoUrl
     yt = YouTube(link)
     #nomeautore = yt.author
