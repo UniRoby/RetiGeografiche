@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Leggi il nuovo dataset
-df = pd.read_csv('commenti_dataset.csv')
+df = pd.read_csv('commenti_dataset_r.csv')
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
