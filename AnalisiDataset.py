@@ -38,8 +38,10 @@ def topicPercentage(df):
     # Stampa i risultati
     print("\nPercentuale di commenti di odio per ogni argomento per social:")
     print(merged_df)
+    
 
-def create_generic_histogram(df,xlabel_title,ylabel_title,topic):
+
+def create_count_histogram(df,xlabel_title,ylabel_title,topic):
     # Iterazione sui titoli delle notizie uniche nel DataFrame
     for titolo in df['titolo'].unique():
         # Selezionare i dati relativi a un titolo specifico
@@ -81,6 +83,80 @@ def create_generic_histogram(df,xlabel_title,ylabel_title,topic):
 
         # Visualizzazione del grafico
         plt.show()
+
+
+def create_topic_comments_category_histogram(df):
+    # Raggruppa per topic e calcola il numero di commenti positivi, negativi e di hate speech
+    grouped_data = df.groupby(['topic', 'sentiment']).size().unstack(fill_value=0)
+    grouped_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])].groupby('topic').size()
+
+    # Prepara i dati per il grafico
+    topics = grouped_data.index
+    positivi = grouped_data['positivo']
+    negativi = grouped_data['negativo']
+    hate_speech = grouped_hate_speech
+
+    # Prepara l'indice delle barre
+    bar_width = 0.25
+    index = np.arange(len(topics))
+
+    # Crea il grafico
+    plt.figure(figsize=(12, 6))
+
+    bars1 = plt.bar(index, positivi, bar_width, label='Positivi', color='green')
+    bars2 = plt.bar(index + bar_width, negativi, bar_width, label='Negativi', color='orange')
+    bars3 = plt.bar(index + bar_width * 2, hate_speech, bar_width, label='Hate Speech', color='red')
+
+    # Aggiungi etichette e titolo
+    plt.xlabel('Topic')
+    plt.ylabel('Numero di Commenti')
+    plt.title('Distribuzione dei Commenti per Categoria e Topic')
+    plt.xticks(index + bar_width, topics)
+    plt.grid(False)
+
+    # Aggiungi legenda
+    plt.legend()
+
+    # Aggiungi annotazioni
+    def autolabel(bars):
+        for bar in bars:
+            height = bar.get_height()
+            plt.annotate('{}'.format(height),
+                         xy=(bar.get_x() + bar.get_width() / 2, height),
+                         xytext=(0, 3),
+                         textcoords="offset points",
+                         ha='center', va='bottom')
+
+    autolabel(bars1)
+    autolabel(bars2)
+    autolabel(bars3)
+
+    plt.tight_layout()
+    plt.savefig('IMAGES/topic_comments_category.png')
+    plt.show()
+
+def create_total_comments_category_histogram(df,commenti_hate_speech):
+    # Filtra i commenti positivi, negativi e di hate speech
+    commenti_positivi = df[df['sentiment'] == 'positivo']
+    commenti_negativi = df[df['sentiment'] == 'negativo']
+
+    # Calcola il numero totale di commenti per ciascuna categoria
+    total_positivi = len(commenti_positivi)
+    total_negativi = len(commenti_negativi)
+    total_hate_speech = len(commenti_hate_speech)
+
+    categories = ['Positivi', 'Negativi', 'Hate Speech']
+    totals = [total_positivi, total_negativi, total_hate_speech]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(categories, totals, color=['green', 'orange', 'red'])
+    plt.title('Numero Totale di commenti per categoria', fontweight='bold')
+    plt.xlabel('Categoria', fontweight='bold')
+    plt.ylabel('Numero di Commenti', fontweight='bold')
+    plt.savefig('IMAGES/total_comments_category.png')
+    plt.show()
+
+
 
 #xlabel= giornale
 #ylabel=numero commenti
@@ -137,13 +213,19 @@ def create_negative_positive_histogram(df,xlabel_title,ylabel_title,topic):
         # Visualizzazione del grafico
         plt.xticks(rotation=0)
         plt.tight_layout()
+        plt.savefig(f'IMAGES/{topic}-{titolo}.png')
         plt.show()
 
 # Leggi il file CSV
-df = pd.read_csv('commenti_dataset_r.csv')
+df = pd.read_csv('test.csv')
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
+
+#grafico
+create_total_comments_category_histogram(df,commenti_hate_speech)
+#grafico
+create_topic_comments_category_histogram(df)
 
 # Numero di titoli diversi per lo stesso giornale
 num_titoli_per_giornale = df.groupby('giornale')['titolo'].nunique()
@@ -157,7 +239,7 @@ print(commenti_per_notizia)
 #Excel
 create_excel(commenti_per_notizia,"commenti_per_notizia","Numero di commenti per ogni notizia (suddivisi per giornale e social")
 #grafico
-#create_generic_histogram(commenti_per_notizia,"Istogramma - Numero di commenti per ogni notizia (suddivisi per giornale e social)","Notizia","Numero di commenti")
+#create_count_histogram(commenti_per_notizia,"Istogramma - Numero di commenti per ogni notizia (suddivisi per giornale e social)","Notizia","Numero di commenti")
 
 
 # Numero di commenti positivi e negativi per ogni notizia (titolo) per social
@@ -167,7 +249,7 @@ print(commenti_positivi_negativi_per_notizia)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia,"commenti_positivi_negativi_per_notizia","Numero di commenti positivi e negativi per ogni notizia")
 #Grafico
-#create_generic_histogram(commenti_positivi_negativi_per_notizia,"Istogramma - Numero di commenti positivi e negativi per ogni notizia","Notizia","Numero di commenti")
+#create_count_histogram(commenti_positivi_negativi_per_notizia,"Istogramma - Numero di commenti positivi e negativi per ogni notizia","Notizia","Numero di commenti")
 
 
 
@@ -179,7 +261,7 @@ print(commenti_odio_per_notizia)
 #Excel
 create_excel(commenti_odio_per_notizia,"commenti_odio_per_notizia","Numero di commenti odio per ogni notizia (suddivisi per giornale e social)")
 #Grafico
-#create_generic_histogram(commenti_odio_per_notizia,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social)","Notizia","Numero di commenti odio")
+#create_count_histogram(commenti_odio_per_notizia,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social)","Notizia","Numero di commenti odio")
 
 
 
@@ -190,7 +272,7 @@ print(commenti_per_topic)
 #Excel
 create_excel(commenti_per_topic,"commenti_per_topic","Commenti negativi e positivi per ogni topic per social")
 #Grafico
-#create_generic_histogram(commenti_per_topic,"Istogramma - Commenti negativi e positivi per ogni topic per social","Topic","Numero di commenti")
+#create_count_histogram(commenti_per_topic,"Istogramma - Commenti negativi e positivi per ogni topic per social","Topic","Numero di commenti")
 
 
 # Commenti di odio per ogni topic
@@ -200,7 +282,7 @@ print(commenti_hS_per_topic)
 #Excel
 create_excel(commenti_hS_per_topic,"commenti_hS_per_topic","Commenti hate speech per ogni topic per social suddivisi per categoria di odio")
 #Grafico
-#create_generic_histogram(commenti_hS_per_topic,"Istogramma - Commenti hate speech per ogni topic per social suddivisi per categoria di odio","Topic","Numero di commenti hate speech")
+#create_count_histogram(commenti_hS_per_topic,"Istogramma - Commenti hate speech per ogni topic per social suddivisi per categoria di odio","Topic","Numero di commenti hate speech")
 
 
 # Conta il numero di commenti odio per ciascun topic
@@ -211,7 +293,7 @@ print(num_commenti_hate_per_topic)
 #Excel
 create_excel(num_commenti_hate_per_topic,"num_commenti_hate_per_topic","Commenti hate speech per ogni topic per social")
 #Grafico
-#create_generic_histogram(num_commenti_hate_per_topic,"Istogramma - Commenti hate speech per ogni topic per social","Topic","Percentuale di commenti hate speech")
+#create_count_histogram(num_commenti_hate_per_topic,"Istogramma - Commenti hate speech per ogni topic per social","Topic","Percentuale di commenti hate speech")
 
 
 topicPercentage(df)
@@ -249,7 +331,7 @@ print(commenti_per_notizia_cronaca)
 #Excel
 create_excel(commenti_per_notizia_cronaca,"commenti_per_notizia_cronaca","Numero di commenti per ogni notizia (suddivisi per giornale e social) (CRONACA)")
 #Grafico
-create_generic_histogram(commenti_per_notizia_cronaca,"Social","Numero Commenti","CRONACA")
+create_count_histogram(commenti_per_notizia_cronaca,"Social","Numero Commenti","CRONACA")
 
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
@@ -263,7 +345,7 @@ print(commenti_odio_per_notizia_cronaca)
 #Excel
 create_excel(commenti_odio_per_notizia_cronaca,"commenti_odio_per_notizia_cronaca","Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (CRONACA)")
 #Grafico
-create_generic_histogram(commenti_odio_per_notizia_cronaca,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca)","Notizia","Numero di commenti odio")
+#create_count_histogram(commenti_odio_per_notizia_cronaca,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca)","Notizia","Numero di commenti odio")
 
 
 #-------------------------CRONACA NERA-----------------------
@@ -286,7 +368,7 @@ print(commenti_per_notizia_cronaca_nera)
 #Excel
 create_excel(commenti_per_notizia_cronaca_nera,"commenti_per_notizia_cronaca_nera","Numero di commenti per ogni notizia (suddivisi per giornale e social) (CRONACA NERA)")
 #Grafico
-create_generic_histogram(commenti_per_notizia_cronaca_nera,"Social","Numero Commenti","CRONACA NERA")
+create_count_histogram(commenti_per_notizia_cronaca_nera,"Social","Numero Commenti","CRONACA NERA")
 
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
@@ -299,7 +381,7 @@ print(commenti_odio_per_notizia_cronaca_nera)
 #Excel
 create_excel(commenti_odio_per_notizia_cronaca_nera,"commenti_odio_per_notizia_cronaca_nera","Numero di commenti odio per ogni notizia (suddivisi per giornale e social (CRONACA NERA)")
 #Grafico
-create_generic_histogram(commenti_odio_per_notizia_cronaca_nera,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca_nera)","Notizia","Numero di commenti odio")
+#create_count_histogram(commenti_odio_per_notizia_cronaca_nera,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca_nera)","Notizia","Numero di commenti odio")
 
 
 #-------------------------POLITICA-----------------------
@@ -322,7 +404,7 @@ print(commenti_per_notizia_politica)
 #Excel
 create_excel(commenti_per_notizia_politica,"commenti_per_notizia_politica","Numero di commenti per ogni notizia (suddivisi per giornale e social) (POLITICA)")
 #Grafico
-create_generic_histogram(commenti_per_notizia_politica,"Social","Numero Commenti","POLITICA")
+create_count_histogram(commenti_per_notizia_politica,"Social","Numero Commenti","POLITICA")
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech_politica = politica[politica['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
@@ -334,7 +416,7 @@ print(commenti_odio_per_notizia_politica)
 #Excel
 create_excel(commenti_odio_per_notizia_politica,"commenti_odio_per_notizia_politica","Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (POLITICA)")
 #Grafico
-#create_generic_histogram(commenti_odio_per_notizia_politica,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (politica)","Notizia","Numero di commenti odio")
+#create_count_histogram(commenti_odio_per_notizia_politica,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (politica)","Notizia","Numero di commenti odio")
 
 
 #--------------------------------------------------------------------------MEDIE------------------------------------------------------------------------------------------
@@ -349,7 +431,7 @@ num_commenti_negativi_per_titolo_e_giornale = df[df['sentiment'] == 'negativo'].
 # Calcola la media per ciascun giornale
 media_negativi_per_giornale = num_commenti_negativi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_negativi'].mean()
 #Grafico
-#create_generic_histogram(media_negativi_per_giornale,"Istogramma - Media Commenti Negativi per Social e Giornale","Giornale","Media Commenti Negativi")
+#create_count_histogram(media_negativi_per_giornale,"Istogramma - Media Commenti Negativi per Social e Giornale","Giornale","Media Commenti Negativi")
 
 # Seleziona solo i commenti positivi
 commenti_positivi = df[df['sentiment'] == 'positivo']
@@ -360,7 +442,7 @@ num_commenti_positivi_per_titolo_e_giornale = commenti_positivi.groupby(['giorna
 # Calcola la media per ciascun giornale suddivisio per social
 media_positivi_per_giornale = num_commenti_positivi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_positivi'].mean()
 #Grafico
-#create_generic_histogram(media_positivi_per_giornale,"Istogramma - Media Commenti Positivi per Social e Giornale","Giornale","Media Commenti Positivi")
+#create_count_histogram(media_positivi_per_giornale,"Istogramma - Media Commenti Positivi per Social e Giornale","Giornale","Media Commenti Positivi")
 
 
 for giornale, media_negativi in media_negativi_per_giornale.items():
