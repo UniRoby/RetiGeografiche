@@ -16,13 +16,14 @@ fig, ax = plt.subplots()
 
 # Raggruppamento per social e giornale e calcolo del numero di commenti
 commenti_per_social_giornale = df.groupby(['Social', 'Giornale'])['Commenti'].sum().unstack(fill_value=0)
-
+print(commenti_per_social_giornale)
 # Calcolo delle posizioni dei gruppi di barre
 ind = range(len(commenti_per_social_giornale.index))
 
 # Creazione delle barre per ogni combinazione di social e giornale
 width = 0.2
 for i, col in enumerate(commenti_per_social_giornale.columns):
+    print(col)
     ax.bar([x + width * i for x in ind], commenti_per_social_giornale[col], width=width, label=col)
 
 # Impostazione del titolo in grassetto

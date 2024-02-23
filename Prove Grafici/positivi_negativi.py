@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-df = pd.read_csv("commenti_dataset_r.csv")
-cronaca = df[df['topic'].str.lower() == 'cronaca']
+df = pd.read_csv("/Users/roby/PycharmProjects/RetiGeografiche/commenti_dataset_r.csv")
+cronaca = df[df['topic'].str.lower() == 'politica']
 df= cronaca.groupby(['topic','titolo','giornale', 'social','sentiment']).size().unstack(fill_value=0).reset_index()
 
 for titolo in df['titolo'].unique():

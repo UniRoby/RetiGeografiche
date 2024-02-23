@@ -160,7 +160,7 @@ def create_total_comments_category_histogram(df,commenti_hate_speech):
 
 #xlabel= giornale
 #ylabel=numero commenti
-def create_negative_positive_histogram(df,xlabel_title,ylabel_title,topic):
+def create_negative_positive_histogram(df,topic):
     # Iterazione sui titoli delle notizie uniche nel DataFrame
     for titolo in df['titolo'].unique():
         # Selezionare i dati relativi a un titolo specifico
@@ -181,9 +181,9 @@ def create_negative_positive_histogram(df,xlabel_title,ylabel_title,topic):
 
         # Definizione dei colori per i social
         colors = {
-            'Facebook': ('#5e6bda', '#338ee0'),  # Colore scuro e chiaro per Facebook
-            'Instagram': ('#e5639c', '#efaeca'),  # Colore scuro e chiaro per Instagram
-            'YouTube': ('#ac2b2b', '#df1818')  # Colore scuro e chiaro per YouTube
+            'Facebook': ('#3b5998', '#1877f2'),  # Colore scuro e chiaro per Facebook
+            'Instagram': ('#c32aa3', '#efaeca'),  # Colore scuro e chiaro per Instagram
+            'YouTube': ('#ac2b2b', '#ff0000')  # Colore scuro e chiaro per YouTube
         }
 
         # Creazione del grafico a barre
@@ -203,8 +203,8 @@ def create_negative_positive_histogram(df,xlabel_title,ylabel_title,topic):
                    label=f'{social} - Positivi', bottom=negativi, color=colors[social][1])
 
         # Impostazione delle etichette sugli assi
-        ax.set_xlabel(xlabel_title, fontweight='bold')
-        ax.set_ylabel(ylabel_title, fontweight='bold')
+        ax.set_xlabel("Giornale", fontweight='bold')
+        ax.set_ylabel("Numero Commenti", fontweight='bold')
         ax.set_title(f'"{titolo}" - Topic: {topic}', fontweight='bold')
         ax.set_xticks(ind + width / 2)
         ax.set_xticklabels(giornali)
@@ -213,7 +213,57 @@ def create_negative_positive_histogram(df,xlabel_title,ylabel_title,topic):
         # Visualizzazione del grafico
         plt.xticks(rotation=0)
         plt.tight_layout()
-        plt.savefig(f'IMAGES/{topic}-{titolo}.png')
+        plt.savefig(f'IMAGES/pos-neg-{topic}-{titolo}.png')
+        plt.show()
+def create_hate_histogram(df,topic):
+    for titolo in df['titolo'].unique():
+        # Selezionare i dati relativi a un titolo specifico
+        df_subset = df[df['titolo'] == titolo]
+        # Creazione del grafico a barre con gruppi affiancati
+        fig, ax = plt.subplots()
+
+        # Raggruppamento per giornale e social e calcolo del numero di commenti
+        commenti_per_giornale_social = df_subset.groupby(['giornale', 'social'])['hate_speech'].sum().unstack(
+            fill_value=0)
+        # Definizione dei colori per i social
+        colori_social = {'Facebook': '#1877f2', 'Instagram': '#c32aa3', 'YouTube': '#ff0000'}
+
+        # Creazione delle barre per ogni combinazione di giornale e social
+        giornali = df_subset['giornale'].unique()
+        socials = df_subset['social'].unique()
+        n_giornali = len(giornali)
+        n_socials = len(socials)
+        width = 0.2
+        space = 0.01  # Spazio tra le barre dello stesso gruppo
+        total_width = width * n_socials + space * (n_socials - 1)  # Larghezza complessiva dei gruppi di barre
+        ind = np.arange(n_giornali)
+
+        for i, social in enumerate(commenti_per_giornale_social.columns):
+            # ax.bar([x + width * i for x in ind], commenti_per_giornale_social[social], width=width, label=social, color=colori_social[social])
+            ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1),
+                   commenti_per_giornale_social[social], width=width, label=social, color=colori_social[social])
+
+        # Impostazione del titolo in grassetto
+        ax.set_title(f'"{titolo}" - Topic: {topic}', fontweight='bold')
+        ax.set_xlabel('Giornale', fontweight='bold')  # Impostazione dell'etichetta sull'asse x in grassetto
+        ax.set_ylabel('Numero di commenti di odio',
+                      fontweight='bold')  # Impostazione dell'etichetta sull'asse y in grassetto
+
+        # Impostazione delle etichette della legenda
+        ax.legend(title='Social', loc='upper left', bbox_to_anchor=(1, 1))
+
+        # Impostazione delle etichette sull'asse x
+        # Utilizza i dati del tuo dataset per le etichette
+        ax.set_xticks([x + 0.2 for x in ind])
+        ax.set_xticklabels(commenti_per_giornale_social.index)
+
+        plt.xticks(rotation=0)
+
+        # Impostazione del margine per garantire che l'intera legenda sia visibile
+        plt.tight_layout()
+        #Crea immagine
+        plt.savefig(f'IMAGES/hate-{topic}-{titolo}.png')
+        # Visualizzazione del grafico
         plt.show()
 
 # Leggi il file CSV
@@ -320,7 +370,7 @@ print(commenti_positivi_negativi_per_notizia_cronaca)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia_cronaca,"commenti_positivi_negativi_per_notizia_cronaca","Numero di commenti positivi e negativi per ogni notizia (CRONACA)")
 #Grafico
-create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_cronaca,"Giornale","Numero Commenti","CRONACA")
+create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_cronaca,"CRONACA")
 
 
 # Numero di commenti per ogni notizia suddivise per giornale e topic (titolo) per social TOPIC=CRONACA
@@ -345,8 +395,7 @@ print(commenti_odio_per_notizia_cronaca)
 #Excel
 create_excel(commenti_odio_per_notizia_cronaca,"commenti_odio_per_notizia_cronaca","Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (CRONACA)")
 #Grafico
-#create_count_histogram(commenti_odio_per_notizia_cronaca,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca)","Notizia","Numero di commenti odio")
-
+create_hate_histogram(commenti_odio_per_notizia_cronaca,"CRONACA")
 
 #-------------------------CRONACA NERA-----------------------
 
@@ -358,7 +407,7 @@ print(commenti_positivi_negativi_per_notizia_cronaca_nera)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia_cronaca_nera,"commenti_positivi_negativi_per_notizia_cronaca_nera","Numero di commenti positivi e negativi per ogni notizia (CRONACA NERA)")
 #Grafico
-create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_cronaca_nera,"Giornale","Numero Commenti","CRONACA NERA")
+create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_cronaca_nera,"CRONACA NERA")
 
 # Numero di commenti per ogni notizia suddivise per giornale e topic (titolo) per social TOPIC=cronaca_nera
 commenti_per_notizia_cronaca_nera = cronaca_nera.groupby(['titolo', 'giornale','social']).size().reset_index(name='num_commenti')
@@ -381,8 +430,7 @@ print(commenti_odio_per_notizia_cronaca_nera)
 #Excel
 create_excel(commenti_odio_per_notizia_cronaca_nera,"commenti_odio_per_notizia_cronaca_nera","Numero di commenti odio per ogni notizia (suddivisi per giornale e social (CRONACA NERA)")
 #Grafico
-#create_count_histogram(commenti_odio_per_notizia_cronaca_nera,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (cronaca_nera)","Notizia","Numero di commenti odio")
-
+create_hate_histogram(commenti_odio_per_notizia_cronaca_nera,"CRONACA NERA")
 
 #-------------------------POLITICA-----------------------
 
@@ -394,7 +442,7 @@ print(commenti_positivi_negativi_per_notizia_politica)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia_politica,"commenti_positivi_negativi_per_notizia_politica","Numero di commenti positivi e negativi per ogni notizia (POLITICA)")
 #Grafico
-create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"Giornale","Numero Commenti","POLITICA")
+create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"POLITICA")
 
 # Numero di commenti per ogni notizia suddivise per giornale e topic (titolo) per social TOPIC=politica
 commenti_per_notizia_politica = politica.groupby(['titolo', 'giornale','social']).size().reset_index(name='num_commenti')
@@ -416,8 +464,7 @@ print(commenti_odio_per_notizia_politica)
 #Excel
 create_excel(commenti_odio_per_notizia_politica,"commenti_odio_per_notizia_politica","Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (POLITICA)")
 #Grafico
-#create_count_histogram(commenti_odio_per_notizia_politica,"Istogramma - Numero di commenti odio per ogni notizia (suddivisi per giornale e social) (politica)","Notizia","Numero di commenti odio")
-
+create_hate_histogram(commenti_odio_per_notizia_politica,"POLITICA")
 
 #--------------------------------------------------------------------------MEDIE------------------------------------------------------------------------------------------
 
