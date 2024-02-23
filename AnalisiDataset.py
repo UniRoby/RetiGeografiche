@@ -108,9 +108,9 @@ def create_topic_comments_category_histogram(df):
     bars3 = plt.bar(index + bar_width * 2, hate_speech, bar_width, label='Hate Speech', color='red')
 
     # Aggiungi etichette e titolo
-    plt.xlabel('Topic')
-    plt.ylabel('Numero di Commenti')
-    plt.title('Distribuzione dei Commenti per Categoria e Topic')
+    plt.xlabel('Topic', fontweight='bold')
+    plt.ylabel('Numero di Commenti',fontweight='bold')
+    plt.title('Distribuzione dei Commenti per Categoria e Topic',fontweight='bold')
     plt.xticks(index + bar_width, topics)
     plt.grid(False)
 
@@ -267,10 +267,23 @@ def create_hate_histogram(df,topic):
         plt.show()
 
 # Leggi il file CSV
-df = pd.read_csv('test.csv')
+df = pd.read_csv('commenti_dataset_a.csv')
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
+
+hate_speech_mapping = {'no': False, 'inappropriato': True, 'offensivo': True, 'violento': True}
+df['hate_speech_flag'] = df['hate_speech'].map(hate_speech_mapping)
+
+# Raggruppa i dati per sentiment e hate_speech e conta il numero di commenti in ciascun gruppo
+counts = df.groupby(['sentiment', 'hate_speech_flag']).size().reset_index(name='count')
+
+# Filtra i dati per ottenere il numero di commenti che sono di odio + positivi e odio + negativi
+hate_positive_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'positivo')]['count'].sum()
+hate_negative_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'negativo')]['count'].sum()
+
+print("Numero di commenti di odio positivi:", hate_positive_count)
+print("Numero di commenti di odio negativi:", hate_negative_count)
 
 #grafico
 create_total_comments_category_histogram(df,commenti_hate_speech)
@@ -399,6 +412,7 @@ create_hate_histogram(commenti_odio_per_notizia_cronaca,"CRONACA")
 
 #-------------------------CRONACA NERA-----------------------
 
+
 cronaca_nera = df[df['topic'].str.lower() == 'cronaca nera']
 # Numero di commenti per ogni notizia (titolo) per social TOPIC=CRONACA_NERA
 commenti_positivi_negativi_per_notizia_cronaca_nera= cronaca_nera.groupby(['topic','titolo','giornale', 'social','sentiment']).size().unstack(fill_value=0).reset_index()
@@ -469,16 +483,13 @@ create_hate_histogram(commenti_odio_per_notizia_politica,"POLITICA")
 #--------------------------------------------------------------------------MEDIE------------------------------------------------------------------------------------------
 
 
-# Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
-commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
+
 
 # Numero di righe negative per ogni notizia/titolo e giornale per social
 num_commenti_negativi_per_titolo_e_giornale = df[df['sentiment'] == 'negativo'].groupby(['giornale', 'titolo','social']).size().reset_index(name='num_commenti_negativi')
 
 # Calcola la media per ciascun giornale
 media_negativi_per_giornale = num_commenti_negativi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_negativi'].mean()
-#Grafico
-#create_count_histogram(media_negativi_per_giornale,"Istogramma - Media Commenti Negativi per Social e Giornale","Giornale","Media Commenti Negativi")
 
 # Seleziona solo i commenti positivi
 commenti_positivi = df[df['sentiment'] == 'positivo']
@@ -488,15 +499,31 @@ num_commenti_positivi_per_titolo_e_giornale = commenti_positivi.groupby(['giorna
 
 # Calcola la media per ciascun giornale suddivisio per social
 media_positivi_per_giornale = num_commenti_positivi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_positivi'].mean()
-#Grafico
-#create_count_histogram(media_positivi_per_giornale,"Istogramma - Media Commenti Positivi per Social e Giornale","Giornale","Media Commenti Positivi")
+
+
+# Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
+commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
+
+
+# Numero di righe con commenti di hate_speech per ogni video, titolo e giornale
+num_commenti_hate_speech_per_titolo_e_giornale = commenti_hate_speech.groupby(['giornale', 'titolo','social']).size().reset_index(name='num_commenti_hate_speech')
+
+
+# Calcola la media dei commenti di hate_speech per ciascun giornale
+media_hate_speech_per_giornale = num_commenti_hate_speech_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_hate_speech'].mean()
+
+# Visualizza il risultato
+print(media_hate_speech_per_giornale)
 
 
 for giornale, media_negativi in media_negativi_per_giornale.items():
-    print(f'Social, Giornale: {giornale}, Media Commenti Negativi: {media_negativi:.2f}')
+    print(f'Giornale, Social: {giornale}, Media Commenti Negativi: {media_negativi:.2f}')
 
 for giornale, media_positivi in media_positivi_per_giornale.items():
-    print(f'Social, Giornale: {giornale}, Media Commenti Positivi: {media_positivi:.2f}')
+    print(f'Giornale, Social: {giornale}, Media Commenti Positivi: {media_positivi:.2f}')
+
+for giornale, media_hate_speech in media_hate_speech_per_giornale.items():
+    print(f'Giornale, Social: {giornale}, Media Commenti Hate Speech: {media_hate_speech:.2f}')
 
 
 
