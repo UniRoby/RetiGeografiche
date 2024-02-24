@@ -10,6 +10,8 @@ def print_dataset_stats(csv_file):
     hate_speech_mapping = {'no': False, 'inappropriato': True, 'offensivo': True, 'violento': True}
     df['hate_speech_flag'] = df['hate_speech'].map(hate_speech_mapping)
 
+
+    print(len(df))
     # STATS: notizia-topic
     selected_df = df[['titolo','topic']]
     unique_df = selected_df.drop_duplicates()
@@ -123,6 +125,7 @@ def print_dataset_stats(csv_file):
 
 def main():
     dataset_file = 'commenti_dataset_a.csv'
+
     print_dataset_stats(dataset_file)
     fix(dataset_file)
 

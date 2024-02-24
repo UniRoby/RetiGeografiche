@@ -268,6 +268,7 @@ def create_hate_histogram(df,topic):
 
 # Leggi il file CSV
 df = pd.read_csv('commenti_dataset_a.csv')
+print(len(df))
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
@@ -456,7 +457,7 @@ print(commenti_positivi_negativi_per_notizia_politica)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia_politica,"commenti_positivi_negativi_per_notizia_politica","Numero di commenti positivi e negativi per ogni notizia (POLITICA)")
 #Grafico
-create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"POLITICA")
+#create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"POLITICA")
 
 # Numero di commenti per ogni notizia suddivise per giornale e topic (titolo) per social TOPIC=politica
 commenti_per_notizia_politica = politica.groupby(['titolo', 'giornale','social']).size().reset_index(name='num_commenti')

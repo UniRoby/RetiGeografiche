@@ -6,7 +6,7 @@ import commentsDataset as cd
 
 def IgComments():
     # Leggi il nuovo dataset
-    df = pd.read_csv('IG/ig.csv')
+    df = pd.read_csv('IG/cutro-rep-instagram.csv')
 
     # ottieni l'autore del post
     commenti= df["Content"].tolist()
