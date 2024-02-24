@@ -62,7 +62,7 @@ def createOrUpdateDataset(comments, giornale, titolo,topic,social):
     df = pd.DataFrame(comment_data)
 
     # Nome del file CSV
-    csv_filename = 'commenti_dataset_a.csv'
+    csv_filename = 'rows_to_add.csv'
 
     # Se il file CSV esiste già, apri il file e aggiungi le nuove righe
     if os.path.exists(csv_filename):

@@ -149,13 +149,18 @@ def create_total_comments_category_histogram(df,commenti_hate_speech):
     totals = [total_positivi, total_negativi, total_hate_speech]
 
     plt.figure(figsize=(10, 6))
-    plt.bar(categories, totals, color=['green', 'orange', 'red'])
+    bars = plt.bar(categories, totals, color=['green', 'orange', 'red'])
     plt.title('Numero Totale di commenti per categoria', fontweight='bold')
     plt.xlabel('Categoria', fontweight='bold')
     plt.ylabel('Numero di Commenti', fontweight='bold')
+
+    # Aggiungi il numero di commenti sopra ogni barra
+    for bar, total in zip(bars, totals):
+        plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), total, ha='center', va='bottom', color='black',
+                 fontsize=10)
+
     plt.savefig('IMAGES/total_comments_category.png')
     plt.show()
-
 
 
 #xlabel= giornale
@@ -189,7 +194,6 @@ def create_negative_positive_histogram(df,topic):
         # Creazione del grafico a barre
         fig, ax = plt.subplots()
 
-        # Iterazione su ogni social per creare le barre
         for i, social in enumerate(socials):
             positivi = []
             negativi = []
@@ -200,7 +204,21 @@ def create_negative_positive_histogram(df,topic):
             ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1), negativi, width,
                    label=f'{social} - Negativi', color=colors[social][0])
             ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1), positivi, width,
-                   label=f'{social} - Positivi', bottom=negativi, color=colors[social][1])
+                   label=f'{social} - Positivi', bottom=np.zeros(len(positivi)),
+                   color=colors[social][1])  # Imposta il bottom a un array di zeri
+
+            # Aggiungi il numero di commenti negativi sopra ogni barra dei commenti negativi
+            for j, neg in enumerate(negativi):
+                ax.annotate(f"{neg}",
+                            xy=(ind[j] + i * (total_width + space) / n_socials + i * space / (n_socials - 1), neg),
+                            ha='center', va='bottom')
+
+            # Aggiungi il numero di commenti positivi sopra o vicino ogni barra dei commenti positivi
+            for j, pos in enumerate(positivi):
+                ax.annotate(f"{pos}",
+                            xy=(ind[j] + i * (total_width + space) / n_socials + i * space / (n_socials - 1), pos),
+                            ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', color='black',
+                            fontsize=8)
 
         # Impostazione delle etichette sugli assi
         ax.set_xlabel("Giornale", fontweight='bold')
@@ -239,9 +257,15 @@ def create_hate_histogram(df,topic):
         ind = np.arange(n_giornali)
 
         for i, social in enumerate(commenti_per_giornale_social.columns):
-            # ax.bar([x + width * i for x in ind], commenti_per_giornale_social[social], width=width, label=social, color=colori_social[social])
             ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1),
                    commenti_per_giornale_social[social], width=width, label=social, color=colori_social[social])
+
+            # Aggiungi il numero di commenti sopra o vicino ogni barra
+            for j, commenti in enumerate(commenti_per_giornale_social[social]):
+                ax.annotate(f"{commenti}",
+                            xy=(ind[j] + i * (total_width + space) / n_socials + i * space / (n_socials - 1), commenti),
+                            ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', color='black',
+                            fontsize=8)
 
         # Impostazione del titolo in grassetto
         ax.set_title(f'"{titolo}" - Topic: {topic}', fontweight='bold')
@@ -265,10 +289,65 @@ def create_hate_histogram(df,topic):
         plt.savefig(f'IMAGES/hate-{topic}-{titolo}.png')
         # Visualizzazione del grafico
         plt.show()
+def create_pos_neg_pie(media_per_giornale, tipo_commento):
+        for giornale, media_per_social in media_per_giornale.items():
+            fig, axs = plt.subplots(1, len(media_per_social), figsize=(18, 6))
+            fig.suptitle(f'Distribuzione dei commenti su {giornale} - {tipo_commento}', fontsize=16,fontweight='bold')
+
+            for i, (social, media) in enumerate(media_per_social.items()):
+                labels = ['Negativi', 'Positivi']
+                sizes = [media['negativi'], media['positivi']]
+                colors = ['orange', 'green']
+
+                axs[i].pie(sizes, labels=None, colors=colors, autopct='%1.1f%%', startangle=140)
+                axs[i].set_title(social, fontweight='bold')
+
+            # Aggiungi la legenda una sola volta per immagine
+            handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in colors]
+            fig.legend(handles, labels, loc='center right')
+
+            # Crea immagine
+            plt.savefig(f'IMAGES/pie-pos-neg-{giornale}.png')
+            plt.show()
+
+
+def create_hate_speech_pie(media_per_giornale, tipo_commento):
+        for giornale, media_per_social in media_per_giornale.items():
+            fig, axs = plt.subplots(1, len(media_per_social), figsize=(18, 6))
+            fig.suptitle(f'Distribuzione dei commenti su {giornale} - {tipo_commento}', fontsize=16,
+                         fontweight='bold')
+
+            for i, (social, media) in enumerate(media_per_social.items()):
+                labels = ['Hate Speech', 'NON Hate Speech']
+                sizes = [media['Hate_Speech'], media['NON_Hate_Speech']]
+                colors = ['red', 'gray']
+
+                axs[i].pie(sizes, labels=None, colors=colors, autopct='%1.1f%%', startangle=140)
+                axs[i].set_title(f' {social}', fontweight='bold')
+
+            # Aggiungi la legenda una sola volta per immagine
+            handles = [plt.Rectangle((0, 0), 1, 1, color=color) for color in colors]
+            fig.legend(handles, labels, loc='center right')
+            # Crea immagine
+            plt.savefig(f'IMAGES/pie-hate-{giornale}.png')
+            plt.show()
 
 # Leggi il file CSV
 df = pd.read_csv('commenti_dataset_a.csv')
 print(len(df))
+hate_speech_mapping = {'no': False, 'inappropriato': True, 'offensivo': True, 'violento': True}
+df['hate_speech_flag'] = df['hate_speech'].map(hate_speech_mapping)
+
+
+# Raggruppa i dati per sentiment e hate_speech e conta il numero di commenti in ciascun gruppo
+counts = df.groupby(['sentiment', 'hate_speech_flag']).size().reset_index(name='count')
+
+# Filtra i dati per ottenere il numero di commenti che sono di odio + positivi e odio + negativi
+hate_positive_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'positivo')]['count'].sum()
+hate_negative_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'negativo')]['count'].sum()
+
+print("Numero di commenti di odio positivi:", hate_positive_count)
+print("Numero di commenti di odio negativi:", hate_negative_count)
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
@@ -484,38 +563,48 @@ create_hate_histogram(commenti_odio_per_notizia_politica,"POLITICA")
 #--------------------------------------------------------------------------MEDIE------------------------------------------------------------------------------------------
 
 
-
-
 # Numero di righe negative per ogni notizia/titolo e giornale per social
-num_commenti_negativi_per_titolo_e_giornale = df[df['sentiment'] == 'negativo'].groupby(['giornale', 'titolo','social']).size().reset_index(name='num_commenti_negativi')
+num_commenti_negativi_per_titolo_e_giornale = df[df['sentiment'] == 'negativo'].groupby(
+    ['giornale', 'titolo', 'social']).size().reset_index(name='num_commenti_negativi')
 
 # Calcola la media per ciascun giornale
-media_negativi_per_giornale = num_commenti_negativi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_negativi'].mean()
+media_negativi_per_giornale = num_commenti_negativi_per_titolo_e_giornale.groupby(['giornale', 'social'])[
+    'num_commenti_negativi'].mean()
 
 # Seleziona solo i commenti positivi
 commenti_positivi = df[df['sentiment'] == 'positivo']
 
 # Conta il numero di commenti positivi per ciascuna notizia e giornale per social
-num_commenti_positivi_per_titolo_e_giornale = commenti_positivi.groupby(['giornale', 'titolo','social']).size().reset_index(name='num_commenti_positivi')
+num_commenti_positivi_per_titolo_e_giornale = commenti_positivi.groupby(
+    ['giornale', 'titolo', 'social']).size().reset_index(name='num_commenti_positivi')
 
 # Calcola la media per ciascun giornale suddivisio per social
-media_positivi_per_giornale = num_commenti_positivi_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_positivi'].mean()
-
+media_positivi_per_giornale = num_commenti_positivi_per_titolo_e_giornale.groupby(['giornale', 'social'])[
+    'num_commenti_positivi'].mean()
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
-commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]
-
+commenti_hate_speech = df[df['hate_speech_flag'] == True]
 
 # Numero di righe con commenti di hate_speech per ogni video, titolo e giornale
-num_commenti_hate_speech_per_titolo_e_giornale = commenti_hate_speech.groupby(['giornale', 'titolo','social']).size().reset_index(name='num_commenti_hate_speech')
-
+num_commenti_hate_speech_per_titolo_e_giornale = commenti_hate_speech.groupby(
+    ['giornale', 'titolo', 'social']).size().reset_index(name='num_commenti_hate_speech')
 
 # Calcola la media dei commenti di hate_speech per ciascun giornale
-media_hate_speech_per_giornale = num_commenti_hate_speech_per_titolo_e_giornale.groupby(['giornale','social'])['num_commenti_hate_speech'].mean()
+media_hate_speech_per_giornale = num_commenti_hate_speech_per_titolo_e_giornale.groupby(['giornale', 'social'])[
+    'num_commenti_hate_speech'].mean()
+
+commenti_non_hate_speech = df[df['hate_speech_flag'] == False]
+
+# Numero di righe con commenti di hate_speech per ogni video, titolo e giornale
+num_commenti_non_hate_speech_per_titolo_e_giornale = commenti_non_hate_speech.groupby(
+    ['giornale', 'titolo', 'social']).size().reset_index(name='num_commenti_hate_speech')
+
+# Calcola la media dei commenti di hate_speech per ciascun giornale
+media_non_hate_speech_per_giornale = num_commenti_non_hate_speech_per_titolo_e_giornale.groupby(['giornale', 'social'])[
+    'num_commenti_hate_speech'].mean()
 
 # Visualizza il risultato
 print(media_hate_speech_per_giornale)
-
 
 for giornale, media_negativi in media_negativi_per_giornale.items():
     print(f'Giornale, Social: {giornale}, Media Commenti Negativi: {media_negativi:.2f}')
@@ -526,6 +615,55 @@ for giornale, media_positivi in media_positivi_per_giornale.items():
 for giornale, media_hate_speech in media_hate_speech_per_giornale.items():
     print(f'Giornale, Social: {giornale}, Media Commenti Hate Speech: {media_hate_speech:.2f}')
 
+for giornale, media_non_hate_speech in media_non_hate_speech_per_giornale.items():
+    print(f'Giornale, Social: {giornale}, Media Commenti NON Hate Speech: {media_non_hate_speech:.2f}')
 
 
+# Crea un dizionario vuoto per memorizzare le medie
+medie_per_giornale = {}
+
+# Itera attraverso le medie dei commenti negativi
+for (giornale_social, media_negativi) in media_negativi_per_giornale.items():
+        if giornale_social[0] not in medie_per_giornale:
+            medie_per_giornale[giornale_social[0]] = {}
+        if giornale_social[1] not in medie_per_giornale[giornale_social[0]]:
+            medie_per_giornale[giornale_social[0]][giornale_social[1]] = {}
+        medie_per_giornale[giornale_social[0]][giornale_social[1]]['negativi'] = media_negativi
+
+# Itera attraverso le medie dei commenti positivi
+for (giornale_social, media_positivi) in media_positivi_per_giornale.items():
+        if giornale_social[0] not in medie_per_giornale:
+            medie_per_giornale[giornale_social[0]] = {}
+        if giornale_social[1] not in medie_per_giornale[giornale_social[0]]:
+            medie_per_giornale[giornale_social[0]][giornale_social[1]] = {}
+        medie_per_giornale[giornale_social[0]][giornale_social[1]]['positivi'] = media_positivi
+
+# Stampare la struttura del dizionario
+print(medie_per_giornale)
+# Crea grafico
+create_pos_neg_pie(medie_per_giornale,"Commenti Positivi e Negativi" )
+
+media_hate_per_giornale = {}
+
+# Itera attraverso le medie dei commenti positivi
+for (giornale_social, media_hate_speech) in media_hate_speech_per_giornale.items():
+        if giornale_social[0] not in media_hate_per_giornale:
+            media_hate_per_giornale[giornale_social[0]] = {}
+        if giornale_social[1] not in media_hate_per_giornale[giornale_social[0]]:
+            media_hate_per_giornale[giornale_social[0]][giornale_social[1]] = {}
+        media_hate_per_giornale[giornale_social[0]][giornale_social[1]]['Hate_Speech'] = media_hate_speech
+
+# Itera attraverso le medie dei commenti positivi
+for (giornale_social, media_non_hate_speech) in media_non_hate_speech_per_giornale.items():
+        if giornale_social[0] not in media_hate_per_giornale:
+            media_hate_per_giornale[giornale_social[0]] = {}
+        if giornale_social[1] not in media_hate_per_giornale[giornale_social[0]]:
+            media_hate_per_giornale[giornale_social[0]][giornale_social[1]] = {}
+        media_hate_per_giornale[giornale_social[0]][giornale_social[1]]['NON_Hate_Speech'] = media_non_hate_speech
+
+
+# Stampare la struttura del dizionario
+print(media_hate_per_giornale)
+#Crea grafico
+create_hate_speech_pie(media_hate_per_giornale, "Commenti Hate Speech")
 

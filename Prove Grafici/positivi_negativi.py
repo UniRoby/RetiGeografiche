@@ -26,15 +26,14 @@ for titolo in df['titolo'].unique():
 
     # Definizione dei colori per i social
     colors = {
-        'Facebook': ('#5e6bda', '#338ee0'),  # Colore scuro e chiaro per Facebook
-        'Instagram': ('#e5639c', '#efaeca'),  # Colore scuro e chiaro per Instagram
-        'YouTube': ('#ac2b2b', '#df1818')  # Colore scuro e chiaro per YouTube
+        'Facebook': ('#3b5998', '#1877f2'),  # Colore scuro e chiaro per Facebook
+        'Instagram': ('#c32aa3', '#efaeca'),  # Colore scuro e chiaro per Instagram
+        'YouTube': ('#ac2b2b', '#ff0000')  # Colore scuro e chiaro per YouTube
     }
 
     # Creazione del grafico a barre
     fig, ax = plt.subplots()
 
-    # Iterazione su ogni social per creare le barre
     for i, social in enumerate(socials):
         positivi = []
         negativi = []
@@ -45,12 +44,25 @@ for titolo in df['titolo'].unique():
         ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1), negativi, width,
                label=f'{social} - Negativi', color=colors[social][0])
         ax.bar(ind + i * (total_width + space) / n_socials + i * space / (n_socials - 1), positivi, width,
-               label=f'{social} - Positivi', bottom=negativi, color=colors[social][1])
+               label=f'{social} - Positivi', bottom=np.zeros(len(positivi)),
+               color=colors[social][1])  # Imposta il bottom a un array di zeri
+
+        # Aggiungi il numero di commenti negativi sopra ogni barra dei commenti negativi
+        for j, neg in enumerate(negativi):
+            ax.annotate(f"{neg}",
+                        xy=(ind[j] + i * (total_width + space) / n_socials + i * space / (n_socials - 1), neg),
+                        ha='center', va='bottom')
+
+        # Aggiungi il numero di commenti positivi sopra o vicino ogni barra dei commenti positivi
+        for j, pos in enumerate(positivi):
+            ax.annotate(f"{pos}",
+                        xy=(ind[j] + i * (total_width + space) / n_socials + i * space / (n_socials - 1), pos),
+                        ha='center', va='bottom', xytext=(0, 3), textcoords='offset points', color='black', fontsize=8)
 
     # Impostazione delle etichette sugli assi
-    ax.set_xlabel('Giornale', fontweight='bold')
-    ax.set_ylabel('Numero di commenti', fontweight='bold')
-    ax.set_title(f'"{titolo}" - Topic: CRONACA', fontweight='bold')
+    ax.set_xlabel("Giornale", fontweight='bold')
+    ax.set_ylabel("Numero Commenti", fontweight='bold')
+    ax.set_title(f'"{titolo}" - Topic: {topic}', fontweight='bold')
     ax.set_xticks(ind + width / 2)
     ax.set_xticklabels(giornali)
 
