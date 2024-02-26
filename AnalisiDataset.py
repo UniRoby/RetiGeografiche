@@ -536,7 +536,7 @@ print(commenti_positivi_negativi_per_notizia_politica)
 #Excel
 create_excel(commenti_positivi_negativi_per_notizia_politica,"commenti_positivi_negativi_per_notizia_politica","Numero di commenti positivi e negativi per ogni notizia (POLITICA)")
 #Grafico
-#create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"POLITICA")
+create_negative_positive_histogram(commenti_positivi_negativi_per_notizia_politica,"POLITICA")
 
 # Numero di commenti per ogni notizia suddivise per giornale e topic (titolo) per social TOPIC=politica
 commenti_per_notizia_politica = politica.groupby(['titolo', 'giornale','social']).size().reset_index(name='num_commenti')
