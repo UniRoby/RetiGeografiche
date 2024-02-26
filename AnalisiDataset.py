@@ -83,7 +83,14 @@ def create_count_histogram(df,xlabel_title,ylabel_title,topic):
 
         # Visualizzazione del grafico
         plt.show()
-
+def autolabel(bars):
+        for bar in bars:
+            height = bar.get_height()
+            plt.annotate('{}'.format(height),
+                         xy=(bar.get_x() + bar.get_width() / 2, height),
+                         xytext=(0, 3),
+                         textcoords="offset points",
+                         ha='center', va='bottom',fontweight='bold')
 
 def create_topic_comments_category_histogram(df):
     # Raggruppa per topic e calcola il numero di commenti positivi, negativi e di hate speech
@@ -118,15 +125,6 @@ def create_topic_comments_category_histogram(df):
     plt.legend()
 
     # Aggiungi annotazioni
-    def autolabel(bars):
-        for bar in bars:
-            height = bar.get_height()
-            plt.annotate('{}'.format(height),
-                         xy=(bar.get_x() + bar.get_width() / 2, height),
-                         xytext=(0, 3),
-                         textcoords="offset points",
-                         ha='center', va='bottom')
-
     autolabel(bars1)
     autolabel(bars2)
     autolabel(bars3)
@@ -157,9 +155,39 @@ def create_total_comments_category_histogram(df,commenti_hate_speech):
     # Aggiungi il numero di commenti sopra ogni barra
     for bar, total in zip(bars, totals):
         plt.text(bar.get_x() + bar.get_width() / 2, bar.get_height(), total, ha='center', va='bottom', color='black',
-                 fontsize=10)
+                 fontsize=10,fontweight='bold')
 
     plt.savefig('IMAGES/total_comments_category.png')
+    plt.show()
+def create_problem_histogram(df,hate_negative_count,hate_positive_count):
+
+
+    # Calcola il numero totale di commenti positivi e negativi
+    total_positive_count = len(df[df['sentiment'] == 'positivo'])
+    total_negative_count = len(df[df['sentiment'] == 'negativo'])
+
+    # Creazione del grafico a barre sovrapposte
+    bar_width = 0.35
+    index = np.arange(2)
+
+    # Creazione delle barre per i commenti positivi e negativi
+    # Creazione delle barre per i commenti positivi e negativi
+    plt.bar(index, [total_positive_count, total_negative_count], bar_width, color=['green', 'orange'],
+            label=['Positivi', 'Negativi'])
+
+    # Creazione delle barre per i commenti di odio positivi e negativi
+    plt.bar(index, [hate_positive_count, hate_negative_count], bar_width, color=['red', 'red'], label='Odio')
+
+    plt.xlabel('Categorie', fontweight='bold')
+    plt.ylabel('Numero commenti', fontweight='bold')
+    plt.title('Commenti di Hate Speech e Sentiment', fontweight='bold')
+    plt.xticks(index, ['Positivi', 'Negativi'])
+    plt.legend()
+
+    # Aggiunta dei numeri sopra le barre
+    for i, value in enumerate([total_positive_count, total_negative_count, hate_positive_count, hate_negative_count]):
+        plt.text(i % 2, value + 10, str(value), ha='center', fontweight='bold')
+    plt.savefig('IMAGES/total_comments_category_hate.png')
     plt.show()
 
 
@@ -348,6 +376,9 @@ hate_negative_count = counts[(counts['hate_speech_flag'] == True) & (counts['sen
 
 print("Numero di commenti di odio positivi:", hate_positive_count)
 print("Numero di commenti di odio negativi:", hate_negative_count)
+
+#garfico
+create_problem_histogram(df,hate_negative_count,hate_positive_count)
 
 # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
 commenti_hate_speech = df[df['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])]

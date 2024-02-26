@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 
 # Leggi il file CSV
-df = pd.read_csv('/Users/roby/PycharmProjects/RetiGeografiche/commenti_dataset_r.csv')
+df = pd.read_csv('/Users/roby/PycharmProjects/RetiGeografiche/commenti_dataset_a.csv')
 
 # Filtra i commenti positivi, negativi e di hate speech
 commenti_positivi = df[df['sentiment'] == 'positivo']
@@ -26,48 +26,41 @@ plt.xlabel('Categoria', fontweight='bold')
 plt.ylabel('Numero di Commenti',fontweight='bold')
 plt.show()
 
+import numpy as np
 
+hate_speech_mapping = {'no': False, 'inappropriato': True, 'offensivo': True, 'violento': True}
+df['hate_speech_flag'] = df['hate_speech'].map(hate_speech_mapping)
 
-# Filtra i commenti per ogni topic
-cronaca = df[df['topic'].str.lower() == 'cronaca']
-cronaca_nera = df[df['topic'].str.lower() == 'cronaca nera']
-politica = df[df['topic'].str.lower() == 'politica']
+# Raggruppa i dati per sentiment e hate_speech e conta il numero di commenti in ciascun gruppo
+counts = df.groupby(['sentiment', 'hate_speech_flag']).size().reset_index(name='count')
 
-# Definisci le categorie di commenti per ogni topic
-categories = ['Positivi', 'Negativi', 'Hate Speech']
+# Filtra i dati per ottenere il numero di commenti che sono di odio + positivi e odio + negativi
+hate_positive_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'positivo')]['count'].sum()
+hate_negative_count = counts[(counts['hate_speech_flag'] == True) & (counts['sentiment'] == 'negativo')]['count'].sum()
 
-# Calcola il numero totale di commenti per ciascuna categoria e ciascun topic
-totals_cronaca = [
-    len(cronaca[cronaca['sentiment'] == 'positivo']),
-    len(cronaca[cronaca['sentiment'] == 'negativo']),
-    len(cronaca[cronaca['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])])
-]
+# Calcola il numero totale di commenti positivi e negativi
+total_positive_count = len(df[df['sentiment'] == 'positivo'])
+total_negative_count = len(df[df['sentiment'] == 'negativo'])
 
-totals_cronaca_nera = [
-    len(cronaca_nera[cronaca_nera['sentiment'] == 'positivo']),
-    len(cronaca_nera[cronaca_nera['sentiment'] == 'negativo']),
-    len(cronaca_nera[cronaca_nera['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])])
-]
+# Creazione del grafico a barre sovrapposte
+bar_width = 0.35
+index = np.arange(2)
 
-totals_politica = [
-    len(politica[politica['sentiment'] == 'positivo']),
-    len(politica[politica['sentiment'] == 'negativo']),
-    len(politica[politica['hate_speech'].isin(['inappropriato', 'offensivo', 'violento'])])
-]
+# Creazione delle barre per i commenti positivi e negativi
+# Creazione delle barre per i commenti positivi e negativi
+plt.bar(index, [total_positive_count, total_negative_count], bar_width, color=['green', 'orange'], label=['Positivi', 'Negativi'])
 
-# Crea il grafico a barre per ogni topic
-plt.figure(figsize=(14, 6))
+# Creazione delle barre per i commenti di odio positivi e negativi
+plt.bar(index, [hate_positive_count, hate_negative_count], bar_width, color=['red', 'red'], label='Odio')
 
-# Barre per il topic CRONACA
-plt.bar([x - 0.2 for x in range(len(categories))], totals_cronaca, width=0.2, color='blue', label='CRONACA')
-# Barre per il topic CRONACA NERA
-plt.bar([x for x in range(len(categories))], totals_cronaca_nera, width=0.2, color='red', label='CRONACA NERA')
-# Barre per il topic POLITICA
-plt.bar([x + 0.2 for x in range(len(categories))], totals_politica, width=0.2, color='green', label='POLITICA')
-
-plt.title('Numero Totale di Commenti per Categoria e Topic')
-plt.xlabel('Categoria')
-plt.ylabel('Numero di Commenti')
-plt.xticks([0, 1, 2], categories)
+plt.xlabel('Categorie', fontweight='bold')
+plt.ylabel('Numero commenti',fontweight='bold')
+plt.title('Commenti di Hate Speech e Sentiment',fontweight='bold')
+plt.xticks(index, ['Positivi', 'Negativi'],fontweight='bold')
 plt.legend()
+
+# Aggiunta dei numeri sopra le barre
+for i, value in enumerate([total_positive_count, total_negative_count, hate_positive_count, hate_negative_count]):
+    plt.text(i % 2, value + 10, str(value), ha='center',fontweight='bold')
+
 plt.show()
