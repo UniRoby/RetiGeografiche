@@ -1,8 +1,8 @@
-#PROGETTO RETI GEOGRAFICHE
+# PROGETTO RETI GEOGRAFICHE
 
-#Sentiment e Hate Speech Analysis delle maggiori testate giornalistiche sui Social Media
+## Sentiment e Hate Speech Analysis delle maggiori testate giornalistiche sui Social Media
 
-##ABSTRACT
+### ABSTRACT
 Con la crescente diffusione dei social media e l’espansione della loro utenza, si è osservato un in-
 cremento significativo dei commenti negativi e dell’hate speech online, specialmente nel contesto delle
 notizie e dell’informazione. Questo fenomeno rappresenta una sfida rilevante nell’ambito della comu-
