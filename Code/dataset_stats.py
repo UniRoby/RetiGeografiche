@@ -30,7 +30,7 @@ def print_dataset_stats(csv_file):
     df['hate_speech_flag'] = df['hate_speech'].map(hate_speech_mapping)
 
 
-    print(len(df))
+    print(f'NUmero commenti totali {len(df)}')
     # STATS: notizia-topic
     selected_df = df[['titolo','topic']]
     unique_df = selected_df.drop_duplicates()
