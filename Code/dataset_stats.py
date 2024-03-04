@@ -109,6 +109,8 @@ def print_dataset_stats(csv_file):
     # Filtra solo i commenti con hate_speech nelle categorie 'inappropriato', 'offensivo' e 'violento'
     commenti_hate_speech = df[df['hate_speech_flag'] == True]
 
+
+
     # Numero di righe con commenti di hate_speech per ogni video, titolo e giornale
     num_commenti_hate_speech_per_titolo_e_giornale = commenti_hate_speech.groupby(
         ['giornale', 'titolo', 'social']).size().reset_index(name='num_commenti_hate_speech')
@@ -228,9 +230,41 @@ def print_dataset_stats(csv_file):
 
     create_hate_speech_pie(media_hate_per_giornale, "Commenti Hate Speech")
 
+    # Raggruppa i dati per Giornale, social, topic e sentiment e conta il numero di commenti negativi in ciascun gruppo
+    grouped_data = df[df['sentiment'] == 'negativo'].groupby(['giornale', 'social', 'topic']).size().reset_index(
+        name='negative_count')
+
+    # Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
+    top_negative_comments = grouped_data.sort_values(by='negative_count', ascending=False).head(3)
+
+    # Stampa la top 3 delle testate giornalistiche con più commenti negativi
+    print("Top 3 Testate Giornalistiche con più commenti negativi:")
+    for index, row in top_negative_comments.iterrows():
+        print("Testata Giornalistica:", row['giornale'])
+        print("Social:", row['social'])
+        print("Topic:", row['topic'])
+        print("Numero di commenti negativi:", row['negative_count'])
+        print("----------------------------------------")
+
+
+    # Raggruppa i dati per Giornale, social, topic e sentiment e conta il numero di commenti negativi in ciascun gruppo
+    grouped_data_hate = df[df['hate_speech_flag'] == True].groupby(['giornale', 'social', 'topic']).size().reset_index(
+        name='hate_count')
+
+    # Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
+    top_negative_comments = grouped_data_hate.sort_values(by='hate_count', ascending=False).head(3)
+
+    # Stampa la top 3 delle testate giornalistiche con più commenti negativi
+    print("Top 3 Testate Giornalistiche con più commenti di odio:")
+    for index, row in top_negative_comments.iterrows():
+        print("Testata Giornalistica:", row['giornale'])
+        print("Social:", row['social'])
+        print("Topic:", row['topic'])
+        print("Numero di commenti odio:", row['hate_count'])
+        print("----------------------------------------")
 
 def main():
-    dataset_file = 'commenti_dataset_a.csv'
+    dataset_file = '/Users/roby/PycharmProjects/RetiGeografiche/Dataset/commenti_dataset_a.csv'
 
     print_dataset_stats(dataset_file)
     fix(dataset_file)
@@ -252,3 +286,6 @@ def fix(file_path):
 
 if __name__ == '__main__':
     main()
+
+
+

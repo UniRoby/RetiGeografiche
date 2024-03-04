@@ -698,3 +698,34 @@ print(media_hate_per_giornale)
 #Crea grafico
 create_hate_speech_pie(media_hate_per_giornale, "Commenti Hate Speech")
 
+# Raggruppa i dati per Giornale, social, topic e sentiment e conta il numero di commenti negativi in ciascun gruppo
+grouped_data = df[df['sentiment'] == 'negativo'].groupby(['giornale', 'social', 'topic']).size().reset_index(
+    name='negative_count')
+
+# Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
+top_negative_comments = grouped_data.sort_values(by='negative_count', ascending=False).head(3)
+
+# Stampa la top 3 delle testate giornalistiche con più commenti negativi
+print("Top 3 Testate Giornalistiche con più commenti negativi:")
+for index, row in top_negative_comments.iterrows():
+    print("Testata Giornalistica:", row['giornale'])
+    print("Social:", row['social'])
+    print("Topic:", row['topic'])
+    print("Numero di commenti negativi:", row['negative_count'])
+    print("----------------------------------------")
+
+# Raggruppa i dati per Giornale, social, topic e sentiment e conta il numero di commenti negativi in ciascun gruppo
+grouped_data_hate = df[df['hate_speech_flag'] == True].groupby(['giornale', 'social', 'topic']).size().reset_index(
+    name='hate_count')
+
+# Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
+top_negative_comments = grouped_data_hate.sort_values(by='hate_count', ascending=False).head(3)
+
+# Stampa la top 3 delle testate giornalistiche con più commenti negativi
+print("Top 3 Testate Giornalistiche con più commenti di odio:")
+for index, row in top_negative_comments.iterrows():
+    print("Testata Giornalistica:", row['giornale'])
+    print("Social:", row['social'])
+    print("Topic:", row['topic'])
+    print("Numero di commenti odio:", row['hate_count'])
+    print("----------------------------------------")
