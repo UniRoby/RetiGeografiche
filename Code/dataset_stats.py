@@ -235,7 +235,7 @@ def print_dataset_stats(csv_file):
         name='negative_count')
 
     # Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
-    top_negative_comments = grouped_data.sort_values(by='negative_count', ascending=False).head(3)
+    top_negative_comments = grouped_data.sort_values(by='negative_count', ascending=False).head(10)
 
     # Stampa la top 3 delle testate giornalistiche con più commenti negativi
     print("Top 3 Testate Giornalistiche con più commenti negativi:")
@@ -252,7 +252,7 @@ def print_dataset_stats(csv_file):
         name='hate_count')
 
     # Trova le prime tre testate giornalistiche con il maggior numero di commenti negativi
-    top_negative_comments = grouped_data_hate.sort_values(by='hate_count', ascending=False).head(3)
+    top_negative_comments = grouped_data_hate.sort_values(by='hate_count', ascending=False).head(10)
 
     # Stampa la top 3 delle testate giornalistiche con più commenti negativi
     print("Top 3 Testate Giornalistiche con più commenti di odio:")
@@ -262,6 +262,31 @@ def print_dataset_stats(csv_file):
         print("Topic:", row['topic'])
         print("Numero di commenti odio:", row['hate_count'])
         print("----------------------------------------")
+
+    # Raggruppa i dati per social e hate_speech e conta il numero di commenti di odio in ciascun gruppo
+    grouped_hate_data = df[df['hate_speech_flag'] == True].groupby('social').size().reset_index(name='hate_count')
+
+    # Ordina i dati in base al numero di commenti di odio e seleziona le prime tre social
+    top_hate_social = grouped_hate_data.sort_values(by='hate_count', ascending=False).head(3)
+
+    print("Top 3 Social con più commenti di odio:")
+    for index, row in top_hate_social.iterrows():
+        print("Social:", row['social'])
+        print("Numero di commenti di odio:", row['hate_count'])
+        print()
+
+    # Raggruppa i dati per social e sentiment, contando il numero di commenti con sentiment negativo in ciascun gruppo
+    grouped_negative_data = df[df['sentiment'] == 'negativo'].groupby('social').size().reset_index(
+        name='negative_count')
+
+    # Ordina i dati in base al numero di commenti con sentiment negativo e seleziona le prime tre social
+    top_negative_social = grouped_negative_data.sort_values(by='negative_count', ascending=False).head(3)
+
+    print("Top 3 Social con più commenti con sentiment negativo:")
+    for index, row in top_negative_social.iterrows():
+        print("Social:", row['social'])
+        print("Numero di commenti con sentiment negativo:", row['negative_count'])
+        print()
 
 def main():
     dataset_file = '/Users/roby/PycharmProjects/RetiGeografiche/Dataset/commenti_dataset_a.csv'
